@@ -1,0 +1,76 @@
+<!doctype html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>Parking Survey</title>
+		<link type="text/css" href="style.css" rel="stylesheet"/>
+		<script src="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script>
+		<link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css"/>
+		<script src="https://www.gstatic.com/firebasejs/live/3.0/firebase.js"></script>
+	</head>
+	<body>
+		<h1 align="center">Parking Survey</h1>
+		<!--Div sizes specified in the css file.
+		Float attribute used to arrange sibling divs adjacent to each other.!-->
+		<div id="top">
+			<div id="directions" align="left">
+				<h4>Directions</h4>
+				<p>Click on your destination on the map, and enter your parking details in the form below.
+				Click on the submit button to enter your information. Thank you.</p>
+			</div>
+			<div id="map"></div>
+		</div>
+		<script src="map.js"></script>
+		<div id="formdiv">
+			<h4>Enter information here.</h4>
+			<form id="form">
+				<p>Destination Name: <input type="text" name="destination"></p>
+				<p>Parking Time (minutes): <input type="number" step="0.5" name="time"></p>
+				<p>Parking Difficulty: <select name="difficulty">
+				<!--Empty <option> allows for initial null.!-->
+					<option></option>
+					<option>Easy</option>
+					<option>Medium</option>
+					<option>Difficult</option>
+					</select></p>
+				<!--Lat and Long are only for reference and so disabled.!-->
+				<p>Latitude: <input id="Latitude" disabled name="latitude"></p>
+				<p>Longitude: <input id="Longitude" disabled name="longitude"></p>
+				<p><button type="submit">Submit</button></p>
+			</form>
+			<script>
+				var f = document.getElementById("form");
+				f.addEventListener("submit", function(e){
+					//Make sure the user has clicked a point with this if statement
+					if (marker !== undefined){
+						//create GeoJSON object
+						var obj = marker.toGeoJSON();
+						
+						/*non GeoJSON object style, used form fields instead of marker
+						var obj = prepare(f.elements.destination.value, f.elements.time.value,
+							f.elements.difficulty.value, f.elements.latitude.value, f.elements.longitude.value);*/
+						
+						//Set GeoJSON object's properties
+						obj.properties.destination = f.elements.destination.value;
+						obj.properties.time = f.elements.time.value;
+						obj.properties.difficulty = f.elements.difficulty.value;
+						//push object to firebase; firebase generates unique key
+						//firebase.database().ref("responses").push(obj);
+						//prevent form submission default behavior
+						e.preventDefault();
+						//reset form fields and marker
+						for (var i in f.elements){
+							f.elements[i].value = null;
+						};
+						map.removeLayer(marker);
+						//Confirm submission and thank user.
+						alert("Thank you for your submission.");
+					}else{
+					//Ask user to click a point if there is none.
+						alert("Please click a point on the map.");
+					};
+				});
+			</script>
+		</div>
+	</body>
+</html>
